@@ -1,17 +1,26 @@
 // ==UserScript==
 // @name         Tag Incomings
-// @version      2.1.3
+// @version      2.1.7
 // @description  Tags new incomings
 // @author       FunnyPocketBook
-// @match        https://*/game.php?*village=*&screen=overview_villages&mode=incomings*
+// @match        https://*/game.php?*mode=incomings*
 // @grant        none
 // @namespace https://greasyfork.org/users/151096
 // ==/UserScript==
-const attack = "attack"; // Change this to your language
-const support = "support"; // Change this to your language
-const noble = "noble" // Change this to your language
-const wait = 10000; // How often the script checks for new attacks in milliseconds
+let attack = "Atak"; // Change this to your language
+let support = "Wsparcie"; // Change this to your language
+let noble = "noble" // Change this to your language
+const wait = 2000; // How often the script checks for new attacks in milliseconds
 
+const domain = document.domain;
+if(domain.includes("tribalwars.com.pt") || domain.includes("tribalwars.com.br")) {
+    attack = "ataque";
+    support = "apoio";
+    noble = "nobre";
+}
+attack = attack.toLowerCase();
+support = support.toLowerCase();
+noble = noble.toLowerCase();
 
 const incRow = document.querySelector("#incomings_table").rows.length;
 const timeout = Math.max(60000, incRow * 31);
@@ -43,7 +52,7 @@ function tagger() {
         if (document.querySelector("#incomings_table > tbody > tr:nth-child(" + i + ") > td:nth-child(1) > span > span > a:nth-child(1) > span:nth-child(2) > img")) {
             nobleIcon = document.querySelector("#incomings_table > tbody > tr:nth-child(" + i + ") > td:nth-child(1) > span > span > a:nth-child(1) > span:nth-child(2) > img").getAttribute("src");
         }
-        incName = incName.replace(/(\r\n|\n|\r)/gm,"").replace(/ /g,"").toLowerCase(); // Remove all whitespace from attack name and make it lowercase
+        incName = incName.trim().toLowerCase();
         // If the attack has the noble icon and is not already tagged as noble, tag it as noble
         if (nobleIcon.includes("snob.png") && !incName.includes(noble)) {
             document.querySelector("#incomings_table > tbody > tr:nth-child(" + i + ") > td:nth-child(1) > span > span > a.rename-icon").click();
@@ -52,8 +61,8 @@ function tagger() {
         }
         // If the attack is labelled with attack or support, click the checkbox so the system automatically tags the inc
         else if (incName.includes(attack) || incName.includes(support)) {
-            document.querySelector('#incomings_table > tbody > tr:nth-child(' + i + ') > td:nth-child(1) > input[type="checkbox"]:nth-child(2)').click();
-        }
+			document.querySelector('#incomings_table > tbody > tr:nth-child(' + i + ') > td:nth-child(1) > input[type="checkbox"]:nth-child(2)').click();
+		}
     }
 
     // Tag the attacks with the number of attacks per attacking village
@@ -64,22 +73,18 @@ function tagger() {
         const attVill = attackingVillage.indexOf($("#incomings_table > tbody > tr:nth-child(" + j + ") > td:nth-child(3) > a").text());
         if(!incName.includes(attack) && incName.slice(-1) != villNr[attVill]) { // If the last character in the inc name is not a number and the incName does not include "attack", append the number
             index = attackingVillage.indexOf($("#incomings_table > tbody > tr:nth-child(" + j + ") > td:nth-child(3) > a").text()); // See which index the attack has
-            document.querySelector("#incomings_table > tbody > tr:nth-child(" + j + ") > td:nth-child(1) > span > span > a.rename-icon").click();
+            document.querySelector("tr.nowrap:nth-child(" + j + ") > td:nth-child(1) > span:nth-child(3) > span:nth-child(1) > a:nth-child(2)").click();
             const incLabel = document.querySelector('#incomings_table > tbody > tr:nth-child(' + j + ') > td:nth-child(1) > span > span.quickedit-edit > input[type="text"]:nth-child(1)');
             if(Number.isInteger(parseInt(incName.slice(-1)))) {
                 incLabel.value = incLabel.value.slice(0, -1);
             }
-            document.querySelector('#incomings_table > tbody > tr:nth-child(' + j + ') > td:nth-child(1) > span > span.quickedit-edit > input[type="text"]:nth-child(1)').value += " " + villNr[index];
-            document.querySelector("#incomings_table > tbody > tr:nth-child(" + j + ") > td:nth-child(1) > span > span.quickedit-edit > input.btn").click();
+            document.querySelector("tr.nowrap:nth-child(" + j + ") > td:nth-child(1) > span:nth-child(3) > span:nth-child(2) > input:nth-child(1)").value += " " + villNr[index];
+            document.querySelector("tr.nowrap:nth-child(" + j + ") > td:nth-child(1) > span:nth-child(3) > span:nth-child(2) > input:nth-child(2)").click();
         }
         j++;
         if(j >= incRow) { // Stop interval, just like the for-loop condition
             clearInterval(tagInterval);
-            if($("#incomings_table > tbody > tr:nth-child(" + incRow + ") > th:nth-child(2) > input:nth-child(2)").attr("name").toLowerCase() === "label") {
-                document.querySelector("#incomings_table > tbody > tr:nth-child(" + incRow + ") > th:nth-child(2) > input:nth-child(2)").click();
-            } else {
-                document.querySelector("#incomings_table > tbody > tr:nth-child(" + incRow + ") > th:nth-child(2) > input:nth-child(3)").click();
-            }
+            document.querySelector("[name=label]").click();
         }
-    }, 30);
+    }, 40);
 }
