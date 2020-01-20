@@ -7,8 +7,8 @@
 // @grant        none
 // @namespace https://greasyfork.org/users/151096
 // ==/UserScript==
-let attack = "Atak"; // Change this to your language
-let support = "Wsparcie"; // Change this to your language
+let attack = "attack"; // Change this to your language
+let support = "support"; // Change this to your language
 let noble = "noble" // Change this to your language
 const wait = 2000; // How often the script checks for new attacks in milliseconds
 
