@@ -34,7 +34,7 @@ villageListHttp.onreadystatechange = () => {
             const totalRow = unitsTable.rows[i + 4];
 
 
-            villageList[villageName] = {
+            villageList[villageId] = {
                 "id": villageId,
                 "name": villageName,
                 "coords": villageCoord,
@@ -56,11 +56,11 @@ villageListHttp.onreadystatechange = () => {
                 }
                 let src = unitsTable.rows[0].cells[j + 1].firstElementChild.getAttribute("src");
                 let unit = src.substring(src.lastIndexOf("/") + 1).replace("unit_", "").replace("(1)", "").split(".")[0];
-                villageList[villageName]["units"]["own"][unit] = parseInt(ownRow.cells[j + 1].textContent);
-                villageList[villageName]["units"]["inVillage"][unit] = parseInt(inVillageRow.cells[j].textContent);
-                villageList[villageName]["units"]["away"][unit] = parseInt(awayRow.cells[j].textContent);
-                villageList[villageName]["units"]["enRoute"][unit] = parseInt(enRouteRow.cells[j].textContent);
-                villageList[villageName]["units"]["total"][unit] = parseInt(totalRow.cells[j].textContent);
+                villageList[villageId]["units"]["own"][unit] = parseInt(ownRow.cells[j + 1].textContent);
+                villageList[villageId]["units"]["inVillage"][unit] = parseInt(inVillageRow.cells[j].textContent);
+                villageList[villageId]["units"]["away"][unit] = parseInt(awayRow.cells[j].textContent);
+                villageList[villageId]["units"]["enRoute"][unit] = parseInt(enRouteRow.cells[j].textContent);
+                villageList[villageId]["units"]["total"][unit] = parseInt(totalRow.cells[j].textContent);
             }
         }
     }
@@ -132,31 +132,32 @@ sumUnitsRadius("axe", "total", 454, 562, 5); // Sum of total axe count in a radi
 function backtimeVillages(targetDate, targetX, targetY) {
     let backtimeVillages = {};
     // Goes through every village in villageList and calculates the distance from village to targetVillage
-    Object.keys(villageList).forEach(function (villName) {
-        const village = villageList[villName];
+    Object.keys(villageList).forEach(function (villageId) {
+        const village = villageList[villageId];
         const x = Math.abs(targetX - village.x);
         const y = Math.abs(targetY - village.y);
         const distance = Math.sqrt(x * x + y * y);
         // Goes through every unit in village and calculates runtime to targetVillage
         Object.keys(village.units.own).forEach(function (unit) {
-            const runtimeMs = unitSpeed[unit] * distance * 60 * 1000;
-            const backtimeSpeedDate = new Date(runtimeMs);
-            const sendBacktimeDate = new Date(targetDate - backtimeSpeedDate);
+            const runtimeMs = unitSpeed[unit] * distance * 60 * 1000; // Time for unit to travel in milliseconds
+            const sendBacktimeDate = new Date(targetDate - runtimeMs); // Calculates when unit has to be sent in order to arrive on targetDate
+            // Checks if sendBacktimeDate is in the future (meaning sending backtime is possible) and the amount of unit that should be sent is in the village, ready to be sent
             if (sendBacktimeDate > new Date() && village.units.own[unit] > 0) {
-                if (!backtimeVillages[villName]) {
-                    backtimeVillages[villName] = {};
+                if (!backtimeVillages[villageId]) {
+                    backtimeVillages[villageId] = {};
                 }
-                backtimeVillages[villName][unit] = {
+                backtimeVillages[villageId][unit] = {
                     "sendDate": sendBacktimeDate,
                     "amount": village.units.own[unit]   
                 };
-                backtimeVillages[villName].coords = village.coords;
-                backtimeVillages[villName].y = village.x;
-                backtimeVillages[villName].x = village.y;
+                backtimeVillages[villageId].coords = village.coords;
+                backtimeVillages[villageId].y = village.x;
+                backtimeVillages[villageId].x = village.y;
             }
         });
     });
-    console.log(`Villages that can send backtime to ${targetX}|${targetY} to arrive at ${targetDate}: ${backtimeVillages}`);
+    console.log(`Villages that can send backtime to ${targetX}|${targetY} to arrive at ${targetDate}:`);
+    console.log(backtimeVillages);
     console.log(Object.keys(backtimeVillages).length);
     return backtimeVillages;
 }
