@@ -6,7 +6,12 @@
     "extends": "eslint:recommended",
     "globals": {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
+        "SharedArrayBuffer": "readonly",
+        "game_data": "readonly",
+        "$": "readonly",
+        "UI": "readonly",
+        "TribalWars": "readonly",
+        "image_base": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2018
