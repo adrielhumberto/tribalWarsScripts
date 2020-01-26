@@ -144,15 +144,18 @@ function backtimeVillages(targetDate, targetX, targetY) {
             // Checks if sendBacktimeDate is in the future (meaning sending backtime is possible) and the amount of unit that should be sent is in the village, ready to be sent
             if (sendBacktimeDate > new Date() && village.units.own[unit] > 0) {
                 if (!backtimeVillages[villageId]) {
-                    backtimeVillages[villageId] = {};
+                    backtimeVillages[villageId] = {
+                        "coords": village.coords,
+                        "y": village.y,
+                        "x": village.x,
+                        "name": village.name,
+                        "id": village.id
+                    };
                 }
                 backtimeVillages[villageId][unit] = {
                     "sendDate": sendBacktimeDate,
-                    "amount": village.units.own[unit]   
+                    "amount": village.units.own[unit] 
                 };
-                backtimeVillages[villageId].coords = village.coords;
-                backtimeVillages[villageId].y = village.x;
-                backtimeVillages[villageId].x = village.y;
             }
         });
     });
