@@ -1,73 +1,91 @@
-let villageList = {};
-let unitSpeed = {};
-const unitSpeedHttp = new XMLHttpRequest();
-const urlUnitSpeed = "https://" + document.domain + "/interface.php?func=get_unit_info";
-unitSpeedHttp.onreadystatechange = () => {
-    if (unitSpeedHttp.readyState === 4 && unitSpeedHttp.status === 200) {
-        const r = unitSpeedHttp.responseXML;
-        for (let unit of game_data.units) {
-            unitSpeed[unit] = parseFloat(r.querySelector("config > " + unit + " > speed").textContent);
-        }
-    }
-};
-// TODO: async await
-unitSpeedHttp.open("GET", urlUnitSpeed, false);
-unitSpeedHttp.send();
-const villageListHttp = new XMLHttpRequest();
-const urlVillageList = document.location.origin + "/game.php?village=" + game_data.village.id + "&screen=overview_villages&type=complete&mode=units&group=0&";
-villageListHttp.onreadystatechange = () => {
-    if (villageListHttp.readyState === 4 && villageListHttp.status === 200) {
-        const parser = new DOMParser();
-        const dom = parser.parseFromString(villageListHttp.responseText, "text/html");
-        const unitsTable = dom.getElementById("units_table");
-        for (let i = 1; i < unitsTable.rows.length; i += 5) {
-            const villageId = parseInt(unitsTable.rows[i].getElementsByTagName("a")[0].href.match(/village=[0-9]+/)[0].replace("village=", ""));
-            const villageName = unitsTable.rows[i].getElementsByClassName("quickedit-label")[0].textContent.trim();
-            const villageCoord = villageName.match(/[0-9]+\|[0-9]+/)[0];
-            const villageX = parseInt(villageCoord.slice(0, 3));
-            const villageY = parseInt(villageCoord.slice(-3));
-            const villageContinent = villageName.slice(-3);
-            const ownRow = unitsTable.rows[i];
-            const inVillageRow = unitsTable.rows[i + 1];
-            const awayRow = unitsTable.rows[i + 2];
-            const enRouteRow = unitsTable.rows[i + 3];
-            const totalRow = unitsTable.rows[i + 4];
+let villageList = getUnits() ;
+let unitSpeed = getUnitSpeed();
 
-
-            villageList[villageId] = {
-                "id": villageId,
-                "name": villageName,
-                "coords": villageCoord,
-                "x": villageX,
-                "y": villageY,
-                "continent": villageContinent,
-                "units": {
-                    "own": {},
-                    "inVillage": {},
-                    "away": {},
-                    "enRoute": {},
-                    "total": {}
-                }
-            };
-            // Goes through every unit cell and fetch the unit amount
-            for (let j = 1; j < unitsTable.rows[0].cells.length - 1; j++) {
-                if (!unitsTable.rows[0].cells[j + 1].firstElementChild) { // First row to get unit names and has one <td> more than the other rows because of rowspan
-                    break;
-                }
-                let src = unitsTable.rows[0].cells[j + 1].firstElementChild.getAttribute("src");
-                let unit = src.substring(src.lastIndexOf("/") + 1).replace("unit_", "").replace("(1)", "").split(".")[0];
-                villageList[villageId]["units"]["own"][unit] = parseInt(ownRow.cells[j + 1].textContent);
-                villageList[villageId]["units"]["inVillage"][unit] = parseInt(inVillageRow.cells[j].textContent);
-                villageList[villageId]["units"]["away"][unit] = parseInt(awayRow.cells[j].textContent);
-                villageList[villageId]["units"]["enRoute"][unit] = parseInt(enRouteRow.cells[j].textContent);
-                villageList[villageId]["units"]["total"][unit] = parseInt(totalRow.cells[j].textContent);
+/**
+ * 
+ * @returns {{}} Object of units with their speed
+ */
+function getUnitSpeed() {
+    let unitSpeed = {};
+    const unitSpeedHttp = new XMLHttpRequest();
+    const urlUnitSpeed = document.location.origin + "/interface.php?func=get_unit_info";
+    unitSpeedHttp.onreadystatechange = () => {
+        if (unitSpeedHttp.readyState === 4 && unitSpeedHttp.status === 200) {
+            const r = unitSpeedHttp.responseXML;
+            for (let unit of game_data.units) {
+                unitSpeed[unit] = parseFloat(r.querySelector("config > " + unit + " > speed").textContent);
             }
+            return unitSpeed;
         }
-    }
-};
-// TODO: async await
-villageListHttp.open("GET", urlVillageList, false);
-villageListHttp.send();
+    };
+    // TODO: async await
+    unitSpeedHttp.open("GET", urlUnitSpeed, false);
+    unitSpeedHttp.send();
+}
+
+/**
+ * Gets all units from every village
+ * @returns {{}} Object with all villages and its unit info
+ */
+function getUnits() {
+    let villageList = {};
+    const villageListHttp = new XMLHttpRequest();
+    const urlVillageList = document.location.origin + "/game.php?village=" + game_data.village.id + "&screen=overview_villages&type=complete&mode=units&group=0&";
+    villageListHttp.onreadystatechange = () => {
+        if (villageListHttp.readyState === 4 && villageListHttp.status === 200) {
+            const parser = new DOMParser();
+            const dom = parser.parseFromString(villageListHttp.responseText, "text/html");
+            const unitsTable = dom.getElementById("units_table");
+            for (let i = 1; i < unitsTable.rows.length; i += 5) {
+                const villageId = parseInt(unitsTable.rows[i].getElementsByTagName("a")[0].href.match(/village=[0-9]+/)[0].replace("village=", ""));
+                const villageName = unitsTable.rows[i].getElementsByClassName("quickedit-label")[0].textContent.trim();
+                const villageCoord = villageName.match(/[0-9]+\|[0-9]+/)[0];
+                const villageX = parseInt(villageCoord.slice(0, 3));
+                const villageY = parseInt(villageCoord.slice(-3));
+                const villageContinent = villageName.slice(-3);
+                const ownRow = unitsTable.rows[i];
+                const inVillageRow = unitsTable.rows[i + 1];
+                const awayRow = unitsTable.rows[i + 2];
+                const enRouteRow = unitsTable.rows[i + 3];
+                const totalRow = unitsTable.rows[i + 4];
+
+
+                villageList[villageId] = {
+                    "id": villageId,
+                    "name": villageName,
+                    "coords": villageCoord,
+                    "x": villageX,
+                    "y": villageY,
+                    "continent": villageContinent,
+                    "units": {
+                        "own": {},
+                        "inVillage": {},
+                        "away": {},
+                        "enRoute": {},
+                        "total": {}
+                    }
+                };
+                // Goes through every unit cell and fetch the unit amount
+                for (let j = 1; j < unitsTable.rows[0].cells.length - 1; j++) {
+                    if (!unitsTable.rows[0].cells[j + 1].firstElementChild) { // First row to get unit names and has one <td> more than the other rows because of rowspan
+                        break;
+                    }
+                    let src = unitsTable.rows[0].cells[j + 1].firstElementChild.getAttribute("src");
+                    let unit = src.substring(src.lastIndexOf("/") + 1).replace("unit_", "").replace("(1)", "").split(".")[0];
+                    villageList[villageId]["units"]["own"][unit] = parseInt(ownRow.cells[j + 1].textContent);
+                    villageList[villageId]["units"]["inVillage"][unit] = parseInt(inVillageRow.cells[j].textContent);
+                    villageList[villageId]["units"]["away"][unit] = parseInt(awayRow.cells[j].textContent);
+                    villageList[villageId]["units"]["enRoute"][unit] = parseInt(enRouteRow.cells[j].textContent);
+                    villageList[villageId]["units"]["total"][unit] = parseInt(totalRow.cells[j].textContent);
+                }
+            }
+            return villageList;
+        }
+    };
+    // TODO: async await
+    villageListHttp.open("GET", urlVillageList, false);
+    villageListHttp.send();
+}
 
 
 /**
@@ -78,10 +96,10 @@ villageListHttp.send();
 
 /**
  * Sums units from a location
- * @param {String} unit unit name
- * @param {String} location location of units ("own", "inVillage", "away", "enRoute", "total")
- * @param {String} continent continent of units ("K[0-99]", "all")
- * @returns {Integer} Sum of unit in the village that are in location
+ * @param {string} unit unit name
+ * @param {string} location location of units ("own", "inVillage", "away", "enRoute", "total")
+ * @param {string} continent continent of units ("K[0-99]", "all")
+ * @returns {number} Sum of unit in the village that are in location
  */
 function sumUnits(unit, location, continent) {
     let sum = 0;
@@ -100,12 +118,12 @@ sumUnits("axe", "own", "K54"); // Sum of all spear that belong to you and are in
 
 /**
  * Sums units in a radius
- * @param {String} unit name of unit
- * @param {String} location location of units ("own", "inVillage", "away", "enRoute", "total")
- * @param {Integer} centerX x-coordinate of circle center
- * @param {Integer} centerY y-coordinate of circle center
- * @param {Integer} radius radius in fields of circle
- * @returns {Integer} Sum of unit in the village that are in location within the radius
+ * @param {string} unit name of unit
+ * @param {string} location location of units ("own", "inVillage", "away", "enRoute", "total")
+ * @param {number} centerX x-coordinate of circle center
+ * @param {number} centerY y-coordinate of circle center
+ * @param {number} radius radius in fields of circle
+ * @returns {number} Sum of unit in the village that are in location within the radius
  */
 function sumUnitsRadius(unit, location, centerX, centerY, radius) {
     let sum = 0;
@@ -127,10 +145,10 @@ sumUnitsRadius("axe", "total", 454, 562, 5); // Sum of total axe count in a radi
 /**
  * Gets all villages that can send a backtime to target
  * @param {Date} targetDate Date of when enemy troops return to the village
- * @param {Integer} targetX x-coordinate of enemy village
- * @param {Integer} targetY y-coordinate of enemy village
- * @param {String[]} units Array with units to include. ["all"] to include every unit
- * @returns {Object} Returns object with villages as keys that can send backtimes. Each village has units as keys that are fast enough for a backtime
+ * @param {number} targetX x-coordinate of enemy village
+ * @param {number} targetY y-coordinate of enemy village
+ * @param {string[]} units Array with units to include. ["all"] to include every unit
+ * @returns {{}} Returns object with villages as keys that can send backtimes. Each village has units as keys that are fast enough for a backtime
  */
 function backtimeVillages(targetDate, targetX, targetY, units) {
     let backtimeVillages = { "targetVillage": targetX + "|" + targetY };
@@ -175,8 +193,8 @@ let backUnits = backtimeVillages(arrivalDate, 447, 533, ["axe", "light", "snob"]
 
 /**
  * Returns a sorted array by date for each unit in the backtimeObject
- * @param {Object} backtimeObject Object returned by backtimeVillages
- * @returns Array of units by ascending date
+ * @param {{}}} backtimeObject Object returned by backtimeVillages
+ * @returns {[{}]}Array of units by ascending date
  */
 function sortUnitByDate(backtimeObject) {
     let units = [];
@@ -208,12 +226,12 @@ let sortedUnits = sortUnitByDate(backUnits);
 
 /**
  * Creates a new popup window with a table of backtimes
- * @param {Object[]} sortedUnits Array of objects returned by sortUnitByDate
+ * @param {[{}]} sortedUnits Array of objects returned by sortUnitByDate
  */
 function parseBacktime(sortedUnits) {
     let main_div = "<div id='bb_main_div' class='popup_stlye' style='display: block; top: 100px; left: 700px; z-index: 99999; position: fixed; border-radius: 8px; border: 2px #804000 solid; background-color: #F1EBDD'></div>";
     let close_button = "<div class='popup_menu'><a href='Javascript:void(0);' id='a_close'>Close</a></div>";
-    let output_text = "<div class='popup_content' style='padding 8px'><h3 align='center'>Backtime</h3></br><table><thead><tr><th>Village</th><th>Unit</th><th>Amount</th><th>Send Date</th></tr></thead><tbody>";
+    let output_text = "<div class='popup_content' style='padding 8px'><h3 align='center'>Backtime</h3></br><table class='vis'><thead><tr><th>Village</th><th>Unit</th><th>Amount</th><th>Send Date</th></tr></thead><tbody>";
     const rowColor = ["row_a", "row_b"];
     let counter = 0;
     $("body").append(main_div);
@@ -239,6 +257,7 @@ parseBacktime(sortedUnits);
 /**
  * Formats date in format of game locale
  * @param {Date} date Date to be formatted
+ * @returns {Date} formatted date
  */
 function formatDateTW(date) {
     const options = {
