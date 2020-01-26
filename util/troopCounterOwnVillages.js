@@ -14,7 +14,7 @@ unitSpeedHttp.onreadystatechange = () => {
 unitSpeedHttp.open("GET", urlUnitSpeed, false);
 unitSpeedHttp.send();
 const villageListHttp = new XMLHttpRequest();
-const urlVillageList = document.location.origin + "/game.php?village=" + game_data.village.id + "&screen=overview_villages&type=complete&group=0&";
+const urlVillageList = document.location.origin + "/game.php?village=" + game_data.village.id + "&screen=overview_villages&type=complete&mode=units&group=0&";
 villageListHttp.onreadystatechange = () => {
     if (villageListHttp.readyState === 4 && villageListHttp.status === 200) {
         const parser = new DOMParser();
@@ -131,16 +131,18 @@ sumUnitsRadius("axe", "total", 454, 562, 5); // Sum of total axe count in a radi
  */
 function backtimeVillages(targetDate, targetX, targetY) {
     let backtimeVillages = {};
+    // Goes through every village in villageList and calculates the distance from village to targetVillage
     Object.keys(villageList).forEach(function (villName) {
         const village = villageList[villName];
         const x = Math.abs(targetX - village.x);
         const y = Math.abs(targetY - village.y);
         const distance = Math.sqrt(x * x + y * y);
+        // Goes through every unit in village and calculates runtime to targetVillage
         Object.keys(village.units.own).forEach(function (unit) {
             const runtimeMs = unitSpeed[unit] * distance * 60 * 1000;
             const backtimeSpeedDate = new Date(runtimeMs);
             const sendBacktimeDate = new Date(targetDate - backtimeSpeedDate);
-            if (sendBacktimeDate > new Date() && village.units.own[unit]) {
+            if (sendBacktimeDate > new Date() && village.units.own[unit] > 0) {
                 if (!backtimeVillages[villName]) {
                     backtimeVillages[villName] = {};
                 }
@@ -154,8 +156,8 @@ function backtimeVillages(targetDate, targetX, targetY) {
             }
         });
     });
-    console.log(backtimeVillages);
-    console.log(`Villages that can send backtime to ${targetX}|${targetY} to arrive at ${targetDate}: ${Object.keys(backtimeVillages).length}`);
+    console.log(`Villages that can send backtime to ${targetX}|${targetY} to arrive at ${targetDate}: ${backtimeVillages}`);
+    console.log(Object.keys(backtimeVillages).length);
     return backtimeVillages;
 }
 
