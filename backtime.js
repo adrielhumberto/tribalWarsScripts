@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Backtime times in inc screen
-// @version      0.5.7
+// @version      1.0.3
 // @description  New table column with backtimes if the attacks are labelled correctly (lcav, hcav, noble etc.)
 // @author       FunnyPocketBook
-// @match        https://*/game.php?village=*&screen=overview_villages&mode=incomings*
+// @match        https://*/game.php*mode=incomings*
 // @grant        none
 // ==/UserScript==
 const debug = false;
@@ -51,7 +51,7 @@ if(domain.includes("tribalwars.net") || domain.includes("tribalwars.co.uk") || d
     ramName = "taran";
     catName = "catapulta";
     snobName = "szlachic";
-} else if(domain.includes("tribalwars.com.pt")) {
+} else if(domain.includes("tribalwars.com.pt") || domain.includes("tribalwars.com.br")) {
     spearName = "lanceiro";
     swordName = "espada";
     axeName = "machado";
@@ -63,7 +63,19 @@ if(domain.includes("tribalwars.net") || domain.includes("tribalwars.co.uk") || d
     ramName = "ariete";
     catName = "cat";
     snobName = "nobre";
-} /*  else if(domain.includes("insertGameNameHere")) { // Uncomment this block to include a new language. Make sure to use the terms Tribal Wars uses with their premium feature for automatic incoming tagging
+} else if(domain.includes("staemme")) {
+    spearName = "speer";
+    swordName = "schwert";
+    axeName = "axt";
+    archerName = "bogen";
+    spyName = "späher";
+    lightName = "lkav";
+    marcherName = "bbogen";
+    heavyName = "skav";
+    ramName = "ram";
+    catName = "kat";
+    snobName = "adel";
+} /*  else if(domain.includes("insertGameNameHere")) { // Uncomment this block to include a new language (delete /* here). Make sure to use the terms Tribal Wars uses with their premium feature for automatic incoming tagging
     spearName = "spear";
     swordName = "sword";
     axeName = "axe";
@@ -75,7 +87,7 @@ if(domain.includes("tribalwars.net") || domain.includes("tribalwars.co.uk") || d
     ramName = "ram";
     catName = "cat";
     snobName = "noble";
-} */
+} */ // Delete "*/"
 const table = document.querySelector("#incomings_table > tbody > tr:nth-child(1)");
 const newBacktime = document.createElement("th"); // Table head for Backtime
 newBacktime.setAttribute("style", "width:100px");
