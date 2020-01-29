@@ -15,11 +15,26 @@ function getVillageInfo(villageList) {
             const farm = unitRecruitTable[i].cells[2].textContent.split("/");
             const farmSpace = parseInt(farm[1]) - parseInt(farm[0]);
             let units = {};
-            for (let j = 3; j < unitRecruitTable[i].cells.length; j++) {              
+            for (let j = 3; j < unitRecruitTable[i].cells.length; j++) {
                 let src = unitRecruitTable[0].cells[j].firstElementChild.getAttribute("src");
                 let unitName = src.substring(src.lastIndexOf("/") + 1).replace("unit_", "").replace("(1)", "").split(".")[0];
                 let unitAmount = parseInt(unitRecruitTable[i].cells[j].firstElementChild.textContent.trim());
-                units[unitName] = unitAmount;
+                if (isNaN(unitAmount)) {
+                    unitAmount = 0;
+                }
+                let unitInTraining = 0;
+                if (unitRecruitTable[i].cells[j].firstElementChild.getElementsByTagName("img")[0]) {
+                    unitInTraining = parseInt(unitRecruitTable[i].cells[j].firstElementChild.getElementsByTagName("img")[0].getAttribute("title"));
+                }
+                let unitTrainableAmount = parseInt(unitRecruitTable[i].cells[j].children[3].textContent.replace(/\(|\)/g, ""));
+                if (isNaN(unitTrainableAmount)) {
+                    unitTrainableAmount = 0;
+                }
+                units[unitName] = {
+                    "currentAmount": unitAmount,
+                    "trainableAmount": unitTrainableAmount,
+                    "inTraining": unitInTraining
+                };
             }
             if (!villageList[id]) {
                 villageList[id] = {};
@@ -40,24 +55,30 @@ function getVillageInfo(villageList) {
 
 /**
  * Trains unitAmount of unit
- * @param {string}  unit        Name of unit
- * @param {number} unitAmount  Amount of unit to train
+ * @param {{}}}  recruitUnits Object of units to train "units[villageId][unit]"
  */
-function recruitUnit(unit, unitAmount) {
-    let data = {h: game_data.csrf};
-    data["units[" + unit + "]"] = unitAmount;
-    TribalWars.post("train", {ajaxaction: "train", mode: "train"}, data, function(r) {
-        if (r.success) {
-            console.log(`Trained ${unitAmount} of ${unit}`);
-            if (document.getElementsByClassName("current_prod_wrapper")[0]) {
-                document.getElementsByClassName("current_prod_wrapper")[0].innerHTML = r.current_order;
-            }
-        }
+function recruitUnits(recruitUnits) {
+    recruitUnits.h = game_data.csrf;
+    $.ajax({
+        url: `${document.location.origin}/game.php?village=${game_data.village.id}&screen=train&mode=success&action=train_mass&page=-1`,
+        type: "post",
+        data: recruitUnits,
+        headers: {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Upgrade-Insecure-Requests": 1
+        },
+        // Remove "X-Requested-With" header
+        xhr: function () {
+            let xhr = $.ajaxSettings.xhr();
+            let setRequestHeader = xhr.setRequestHeader;
+            xhr.setRequestHeader = function (name, value) {
+                if (name == "X-Requested-With") return;
+                setRequestHeader.call(this, name, value);
+            };
+            return xhr;
+        },
+    }).done(function () { // TODO: Check which units have been recruited and notify user
+        console.log("done");
     });
 }
-
-
-/**
- * - Get units in training -> Where? Don't send too many requests
- * - Only get units in current training for one village
- */
