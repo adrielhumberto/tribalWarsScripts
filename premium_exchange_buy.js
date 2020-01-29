@@ -224,7 +224,7 @@ function buy(res, amnt) {
         data.h = game_data.csrf;
         TribalWars._ah = {
             TribalWarsTE: 1,
-        }
+        };
         TribalWars.post("market", {ajaxaction: "exchange_confirm"}, data, function(r) {
             isBuying = false;
             if (r.success) {
@@ -233,8 +233,8 @@ function buy(res, amnt) {
                 $("#market_status_bar").replaceWith(r.data.status_bar);
                 getRes();
             }
-        })
-    })
+        });
+    });
 }
 /**
  * Update resource objects
