@@ -193,8 +193,8 @@ let backUnits = backtimeVillages(arrivalDate, 447, 533, ["axe", "light", "snob"]
 
 /**
  * Returns a sorted array by date for each unit in the backtimeObject
- * @param {{}}} backtimeObject Object returned by backtimeVillages
- * @returns {[{}]}Array of units by ascending date
+ * @param {{}} backtimeObject Object returned by backtimeVillages
+ * @returns {Object[]} Array of units by ascending date
  */
 function sortUnitByDate(backtimeObject) {
     let units = [];
@@ -226,7 +226,7 @@ let sortedUnits = sortUnitByDate(backUnits);
 
 /**
  * Creates a new popup window with a table of backtimes
- * @param {[{}]} sortedUnits Array of objects returned by sortUnitByDate
+ * @param {Object[]} sortedUnits Array of objects returned by sortUnitByDate
  */
 function parseBacktime(sortedUnits) {
     let main_div = "<div id='bb_main_div' class='popup_stlye' style='display: block; top: 100px; left: 700px; z-index: 99999; position: fixed; border-radius: 8px; border: 2px #804000 solid; background-color: #F1EBDD'></div>";
