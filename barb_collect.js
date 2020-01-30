@@ -72,7 +72,9 @@ function barbCollect() {
 	function __(settingsObj) {
 		settingsObj = settingsObj || {};
 		if (checkSettings(settingsObj)) {
-			return selectCoords(listAllCoords());
+			let allBarbs = selectCoords(listAllCoords());
+			console.log(allBarbs);
+			return allBarbs;
 		}
 	}
 	if (typeof points !== 'undefined') {

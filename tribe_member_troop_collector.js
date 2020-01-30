@@ -1,5 +1,8 @@
+/**
+ * Get units of a tribe member as tribe leader
+ * @param {number} player_id Player ID
+ */
 function getMemberTroops(player_id) {
-    let playerTroops = {};
     $.ajax({
         url: `${window.location.origin}/game.php?screen=ally&mode=members_troops&player_id=${player_id}&village=${game_data.village.id}`,
         type: "GET",
@@ -13,10 +16,7 @@ function getMemberTroops(player_id) {
         let selection = dom.getElementsByClassName("input-nicer")[0];
         let playerName = selection[selection.selectedIndex].textContent.trim();
         let table = dom.getElementsByClassName("w100")[0];
-        let units = getUnits(table);
-        playerTroops[playerName] = units;
-        console.log(playerTroops);
-        reeturn playerTroops;
+        return getUnits(table);
     });
 }
 

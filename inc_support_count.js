@@ -8,20 +8,6 @@
 // @include https://*/game.php?village=*&screen=info_village*
 // ==/UserScript==
 
-/**
- * name Incoming Troops Count
- * description Shows total number of troops incoming if shared commands enabled
- * author FunnyPocketBook
- * version 0.4.2
- */
-
- /**
-  * Name: Inc Counter
-  * Description: Adds all known incoming troops (attack and support) together in the village info
-  * Author: FunnyPocketBook
-  * Version: 0.4.2
-  */
-
 let titleParent = $("#content_value > table:nth-child(3) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2)");
 let unitConfig =
     `<h4>Incoming support</h4><span id="supportText"></span>
