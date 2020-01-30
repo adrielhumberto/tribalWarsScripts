@@ -11,7 +11,8 @@
         "$": "readonly",
         "UI": "readonly",
         "TribalWars": "readonly",
-        "image_base": "readonly"
+        "image_base": "readonly",
+        "VillageContext": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2018
