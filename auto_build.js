@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Auto Builder
-// @version      0.5.3
+// @version      0.5.4
 // @description  Adds buildings to queue automatically
 // @author       FunnyPocketBook
 // @match        https://*/game.php?village=*&screen=main*
